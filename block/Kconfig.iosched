@@ -78,6 +78,15 @@ config CFQ_GROUP_IOSCHED
 	---help---
 	  Enable group IO scheduling in CFQ.
 
+
+config IOSCHED_FIOPS
+	tristate "IOPS based I/O scheduler"
+	default y
+	---help---
+	  This is an IOPS based I/O scheduler. It will try to distribute
+          IOPS equally among all processes in the system. It's mainly for
+          Flash based storage.
+
 choice
 	prompt "Default I/O scheduler"
 	default DEFAULT_CFQ
@@ -103,6 +112,10 @@ choice
 	config DEFAULT_VR
 		bool "VR" if IOSCHED_VR=y
 
+	config DEFAULT_FIOPS
+		bool "FIOPS" if IOSCHED_FIOPS=y
+
+
 endchoice
 
 config DEFAULT_IOSCHED
@@ -110,9 +123,10 @@ config DEFAULT_IOSCHED
 	default "deadline" if DEFAULT_DEADLINE
 	default "cfq" if DEFAULT_CFQ
 	default "noop" if DEFAULT_NOOP
-	default "sio" if DEFAULT_SION
-	default "zen" if DEFAULT_ZEN
+	ddefault "zen" if DEFAULT_ZEN
 	default "vr" if DEFAULT_VR
+	default "sio" if DEFAULT_SIO
+	default "fiops" if DEFAULT_FIOPS
 
 endmenu
 
