@@ -379,7 +379,7 @@ static void setup_callbacks(struct rchan *chan,
 	chan->cb = cb;
 }
 
-static int __cpuinit relay_hotcpu_callback(struct notifier_block *nb,
+static int relay_hotcpu_callback(struct notifier_block *nb,
 				unsigned long action,
 				void *hcpu)
 {
