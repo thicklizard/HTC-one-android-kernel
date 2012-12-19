@@ -1229,7 +1229,7 @@ SYSCALL_DEFINE2(nanosleep, struct timespec __user *, rqtp,
 static void init_hrtimers_cpu(int cpu)
 {
 	struct hrtimer_cpu_base *cpu_base = &per_cpu(hrtimer_bases, cpu);
-	static char __cpuinitdata cpu_base_done[NR_CPUS];
+	static char cpu_base_done[NR_CPUS];
 	int i;
 	unsigned long flags;
 
@@ -1334,7 +1334,7 @@ static int hrtimer_cpu_notify(struct notifier_block *self,
 	return NOTIFY_OK;
 }
 
-static struct notifier_block __cpuinitdata hrtimers_nb = {
+static struct notifier_block hrtimers_nb = {
 	.notifier_call = hrtimer_cpu_notify,
 };
 
