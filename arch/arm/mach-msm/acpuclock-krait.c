@@ -1000,6 +1000,14 @@ static struct notifier_block acpuclk_cpu_notifier = {
 	.notifier_call = acpuclk_cpu_callback,
 };
 
+#ifdef CONFIG_MSM_MPDEC
+uint32_t acpu_check_khz_value(unsigned long khz)
+{
+        return 0;
+}
+EXPORT_SYMBOL(acpu_check_khz_value);
+#endif 
+
 static const int krait_needs_vmin(void)
 {
 	switch (read_cpuid_id()) {
