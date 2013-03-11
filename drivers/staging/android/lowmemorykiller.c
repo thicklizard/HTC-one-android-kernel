@@ -39,7 +39,7 @@
 #include <linux/notifier.h>
 
 extern void show_meminfo(void);
-static uint32_t lowmem_debug_level = 2;
+static uint32_t lowmem_debug_level = 1;
 static int lowmem_adj[6] = {
 	0,
 	1,
