@@ -563,14 +563,14 @@ static int htc_headset_pmic_probe(struct platform_device *pdev)
 
 	wake_lock_init(&hi->hs_wake_lock, WAKE_LOCK_SUSPEND, DRIVER_NAME);
 
-	detect_wq = create_workqueue("HS_PMIC_DETECT");
+	detect_wq = create_singlethread_workqueue("HS_PMIC_DETECT");
 	if (detect_wq  == NULL) {
 		ret = -ENOMEM;
 		HS_ERR("Failed to create detect workqueue");
 		goto err_create_detect_work_queue;
 	}
 
-	button_wq = create_workqueue("HS_PMIC_BUTTON");
+	button_wq = create_singlethread_workqueue("HS_PMIC_BUTTON");
 	if (button_wq == NULL) {
 		ret = -ENOMEM;
 		HS_ERR("Failed to create button workqueue");
