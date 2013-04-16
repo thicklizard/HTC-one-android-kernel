@@ -2002,18 +2002,18 @@ static void synaptics_ts_finger_func(struct synaptics_ts_data *ts)
 								if ((barrier[0] == true) ||
 								   ((finger_data[i][0] > prevx) &&
 								    (finger_data[i][0] < nextx) &&
-								    (finger_data[i][1] > 2700))) {
+								    (finger_data[i][1] > 2775))) {
 									prevx = nextx;
 									nextx = 990;
 									barrier[0] = true;
 									if ((barrier[1] == true) ||
 									   ((finger_data[i][0] > prevx) &&
 									    (finger_data[i][0] < nextx) &&
-									    (finger_data[i][1] > 2700))) {
+									    (finger_data[i][1] > 2775))) {
 										prevx = nextx;
 										barrier[1] = true;
 										if ((finger_data[i][0] > prevx) &&
-										    (finger_data[i][1] > 2700)) {
+										    (finger_data[i][1] > 2775)) {
 											if (finger_data[i][0] > 1300) {
 												if (exec_count) {
 													printk(KERN_INFO "[sweep2wake]: ON");
@@ -2033,18 +2033,18 @@ static void synaptics_ts_finger_func(struct synaptics_ts_data *ts)
 								if ((barrier[0] == true) ||
 								   ((finger_data[i][0] < prevx) &&
 								    (finger_data[i][0] > nextx) &&
-								    (finger_data[i][1] > 2700))) {
+								    (finger_data[i][1] > 2775))) {
 									prevx = nextx;
 									nextx = 750;
 									barrier[0] = true;
 									if ((barrier[1] == true) ||
 									   ((finger_data[i][0] < prevx) &&
 									    (finger_data[i][0] > nextx) &&
-									    (finger_data[i][1] > 2700))) {
+									    (finger_data[i][1] > 2775))) {
 										prevx = nextx;
 										barrier[1] = true;
 										if ((finger_data[i][0] < prevx) &&
-										    (finger_data[i][1] > 2700)) {
+										    (finger_data[i][1] > 2775)) {
 											if (finger_data[i][0] < 400) {
 												if (exec_count) {
 													printk(KERN_INFO "[sweep2wake]: OFF");
