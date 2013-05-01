@@ -159,9 +159,8 @@ static int do_fsync(unsigned int fd, int datasync)
 {
 	struct file *file;
 	int ret = -EBADF;
-	int fput_needed;
 
-	file = fget_light(fd, &fput_needed);
+	file = fget(fd);
 	if (file) {
 		ktime_t fsync_t, fsync_diff;
 		char pathname[256], *path;
@@ -170,14 +169,10 @@ static int do_fsync(unsigned int fd, int datasync)
 			path = "(unknown)";
 		fsync_t = ktime_get();
 		ret = vfs_fsync(file, datasync);
-<<<<<<< HEAD
 		fput(file);
 		fsync_diff = ktime_sub(ktime_get(), fsync_t);
 		if (ktime_to_ns(fsync_diff) >= 5000000000LL)
 			pr_info("VFS: %s pid:%d(%s)(parent:%d/%s) takes %lld nsec to fsync %s.\n", __func__, current->pid, current->comm, current->parent->pid, current->parent->comm, ktime_to_ns(fsync_diff), path);
-=======
-		fput_light(file, fput_needed);
->>>>>>> 9adfda5... switch do_fsync() to fget_light()
 	}
 	return ret;
 }
