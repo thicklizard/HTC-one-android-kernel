@@ -1823,7 +1823,6 @@ static void logo2wake_func(void) {
 
 	if (s2w_switch == 3 && ((l2m_time[0]-l2m_time[1]) > L2M_TIMEOUT)) {
 		printk(KERN_INFO"[L2M]: power button activated\n");
-		vibrate(20);
 		sweep2wake_pwrtrigger();
 	}
 
