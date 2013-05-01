@@ -32,6 +32,7 @@
 #include <linux/input/mt.h>
 #include <linux/pl_sensor.h>
 #include <linux/async.h>
+#include <linux/mfd/pm8xxx/vibrator.h> 
 
 #define SYN_I2C_RETRY_TIMES 10
 #define SHIFT_BITS 10
@@ -150,7 +151,12 @@ int s2w_wakestat = 0;
 bool scr_suspended = false;
 int s2w_hist[2] = {0, 0};
 cputime64_t s2w_time[2] = {0, 0};
-#define S2W_TIMEOUT 300
+int l2m_hist[2] = {0, 0};
+cputime64_t l2m_time[2] = {0, 0};
+int home_suppress = 0;
+int back_suppress = 0;
+#define S2W_TIMEOUT 350
+#define L2M_TIMEOUT 300
 static struct input_dev * sweep2wake_pwrdev;
 static DEFINE_MUTEX(pwrkeyworklock);
 
@@ -197,6 +203,40 @@ void sweep2wake_menutrigger(void) {
                 schedule_work(&sweep2wake_pressmenu_work);
         return;
 } 
+
+static int __init get_s2w_opt(char *s2w)
+{
+	if (strcmp(s2w, "0") == 0) {
+		s2w_switch = 0;
+	} else if (strcmp(s2w, "1") == 0) {
+		s2w_switch = 1;
+	} else if (strcmp(s2w, "2") == 0) {
+		s2w_switch = 2;
+	} else if (strcmp(s2w, "3") == 0) {
+		s2w_switch = 3;
+	} else {
+		s2w_switch = 0;
+	}
+	return 1;
+}
+
+__setup("s2w=", get_s2w_opt); 
+
+
+static int __init get_l2m_opt(char *l2m)
+{
+	if (strcmp(l2m, "0") == 0) {
+		l2m_switch = 0;
+	} else if (strcmp(l2m, "1") == 0) {
+		l2m_switch = 1;
+	} else {
+		l2m_switch = 0;
+	}
+	return 1;
+}
+
+__setup("l2m=", get_l2m_opt); 
+
 #endif
 
 static void syn_page_select(struct i2c_client *client, uint8_t page)
@@ -1415,10 +1455,9 @@ static ssize_t synaptics_sweep2wake_show(struct device *dev,
 static ssize_t synaptics_sweep2wake_dump(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
-	if (buf[0] >= '0' && buf[0] <= '2' && buf[1] == '\n')
+	if (buf[0] >= '0' && buf[0] <= '3' && buf[1] == '\n')
                 if (s2w_switch != buf[0] - '0')
 		        s2w_switch = buf[0] - '0';
-
 	return count;
 }
 
@@ -1438,7 +1477,7 @@ static ssize_t synaptics_logo2menu_dump(struct device *dev, struct device_attrib
 	if (buf[0] >= '0' && buf[0] <= '1' && buf[1] == '\n')
 	if (l2m_switch != buf[0] - '0') {
 		l2m_switch = buf[0] - '0';
-	}	
+	}
 	return count;
 }
 
@@ -1743,10 +1782,10 @@ static int synaptics_init_panel(struct synaptics_ts_data *ts)
 }
 
 
-static void sweep2wake_func(int button_id, cputime64_t trigger_time) {
+static void sweep2wake_func(int button_id, cputime64_t strigger_time) {
 
         s2w_time[1] = s2w_time[0];
-        s2w_time[0] = trigger_time;
+        s2w_time[0] = strigger_time;
 
         s2w_hist[1] = s2w_hist[0];
         s2w_hist[0] = button_id;
@@ -1756,18 +1795,37 @@ static void sweep2wake_func(int button_id, cputime64_t trigger_time) {
         if (scr_suspended) {
 
 		if ((s2w_hist[1] == 1 && s2w_hist[0] == 2) && ((s2w_time[0]-s2w_time[1]) < S2W_TIMEOUT)) {
-                        printk(KERN_INFO"[sweep2wake]: >> OFF->ON <<\n");
+                        printk(KERN_INFO"[S2W]: OFF->ON\n");
+
                         sweep2wake_pwrtrigger();
 		}
 
         } else if (!scr_suspended) {
 
 		if ((s2w_hist[1] == 2 && s2w_hist[0] == 1) && ((s2w_time[0]-s2w_time[1]) < S2W_TIMEOUT)) {
-                        printk(KERN_INFO"[sweep2wake]: >> ON->OFF <<\n");
+                        printk(KERN_INFO"[S2W]: ON->OFF\n");
                         sweep2wake_pwrtrigger();
 		}
 	}
 
+
+        return;
+}
+
+static void logo2wake_func(void) {
+
+//	printk(KERN_INFO "button id 1=%i, button id 2= %i\n", l2m_hist[0], l2m_hist[1]);
+
+	if (l2m_switch == 1 && scr_suspended == false && ((l2m_time[0]-l2m_time[1]) < L2M_TIMEOUT)) {     
+		printk(KERN_INFO"[L2M]: menu button activated\n");
+		sweep2wake_menutrigger();  
+	}
+
+	if (s2w_switch == 3 && ((l2m_time[0]-l2m_time[1]) > L2M_TIMEOUT)) {
+		printk(KERN_INFO"[L2M]: power button activated\n");
+		vibrate(20);
+		sweep2wake_pwrtrigger();
+	}
 
         return;
 }
@@ -1778,15 +1836,21 @@ static int last_touch_position_y = 0;
 
 static int report_htc_logo_area(int x, int y)
 {
-    if (l2m_switch == 0) return 0; //probably don't need this
+        cputime64_t ltrigger_time;
 
-    if (last_touch_position_x>620 && last_touch_position_x<1180) {
-        if (last_touch_position_y>2835) {
-	      printk("menu button pressed\n");
-	      return 1;
-        }
-    }
-    return 0;
+	if (l2m_switch == 0 && s2w_switch < 3)
+		return 0;
+
+	if (last_touch_position_x > 620 && last_touch_position_x < 1150) {
+		if (last_touch_position_y > 2835 || (scr_suspended == true && last_touch_position_y > 2750)) {
+			ltrigger_time = ktime_to_ms(ktime_get());
+			l2m_time[1] = l2m_time[0];
+			l2m_time[0] = ltrigger_time;
+			printk("[L2M]: HTC button pressed\n");
+			return 1;
+		}
+ 	}
+	return 0;
 }
 #endif 
 
@@ -1938,11 +2002,9 @@ static void synaptics_ts_finger_func(struct synaptics_ts_data *ts)
 		}
 
 #ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE
-      if ((((ts->finger_count > 0)?1:0) == 0) && (l2m_switch > 0)) { 
+      if ((((ts->finger_count > 0)?1:0) == 0) && ((l2m_switch == 1) || (s2w_switch == 3))) { 
             if (report_htc_logo_area(last_touch_position_x,last_touch_position_x)) {
-                  if (scr_suspended == false) {     
-                     sweep2wake_menutrigger();  
-                  }
+		     logo2wake_func();
             }
       }
 #endif 
@@ -2244,7 +2306,10 @@ static void synaptics_ts_button_func(struct synaptics_ts_data *ts)
 	uint8_t data = 0;
 	uint16_t x_position = 0, y_position = 0;
         int button_id = 0;
-        cputime64_t trigger_time = 0;
+        cputime64_t strigger_time = 0;
+
+	back_suppress = 0;
+	home_suppress = 0;
 
 	ret = i2c_syn_read(ts->client,
 		get_address_base(ts, 0x1A, DATA_BASE), &data, 1);
@@ -2253,12 +2318,17 @@ static void synaptics_ts_button_func(struct synaptics_ts_data *ts)
 			printk("[TP] back key pressed\n");
 			vk_press = 1;
 			button_id = 1;
+			last_touch_position_x = 0;
+			last_touch_position_y = 0;
 
-			if (s2w_switch > 0) {
-				trigger_time = ktime_to_ms(ktime_get());
-				sweep2wake_func(button_id, trigger_time);
-			printk(KERN_INFO "button id=%i\n", button_id);
+			if (s2w_switch == 1 || s2w_switch == 2) {
+				strigger_time = ktime_to_ms(ktime_get());
+				sweep2wake_func(button_id, strigger_time);
+				printk(KERN_INFO "[S2W]: button id=%i\n", button_id);
 			}
+
+
+			if (!back_suppress) {
 
 			if (ts->button) {
 				if (ts->button[0].index) {
@@ -2306,17 +2376,22 @@ static void synaptics_ts_button_func(struct synaptics_ts_data *ts)
 				input_report_abs(ts->input_dev, ABS_MT_POSITION_Y,
 					y_position);
 			}
+			}
 		}
 		else if (data & 0x02) {
-			printk("[TP] home key pressed");
+			printk("[TP] home key pressed\n");
 			vk_press = 1;
 			button_id = 2;
+			last_touch_position_x = 0;
+			last_touch_position_y = 0;
 
-			if (s2w_switch > 0) {
-				trigger_time = ktime_to_ms(ktime_get());
-				sweep2wake_func(button_id, trigger_time);
-			printk(KERN_INFO "button id=%i\n", button_id);
+			if (s2w_switch == 1 || s2w_switch == 2) {
+				strigger_time = ktime_to_ms(ktime_get());
+				sweep2wake_func(button_id, strigger_time);
+				printk(KERN_INFO "[S2W]: button id=%i\n", button_id);
 			}
+			
+			if (!home_suppress) {			
 
 			if (ts->button) {
 				if (ts->button[1].index) {
@@ -2364,9 +2439,10 @@ static void synaptics_ts_button_func(struct synaptics_ts_data *ts)
 				input_report_abs(ts->input_dev, ABS_MT_POSITION_Y,
 					y_position);
 			}
+			}
 		}
 	}else {
-		printk("[TP] virtual key released");
+		printk("[TP] virtual key released\n");
 		vk_press = 0;
 		if (ts->htc_event == SYN_AND_REPORT_TYPE_A) {
 			if (ts->support_htc_event) {
@@ -2449,10 +2525,13 @@ static irqreturn_t synaptics_irq_thread(int irq, void *ptr)
 		i2c_syn_error_handler(ts, ts->i2c_err_handler_en, "r", __func__);
 	} else {
 		if (buf & get_address_base(ts, 0x1A, INTR_SOURCE)) {
-//			if (!ts->finger_count)
-				synaptics_ts_button_func(ts);
-//			else
+			if (s2w_switch == 3 || s2w_switch == 0) {
+				if (!ts->finger_count)
+					synaptics_ts_button_func(ts);
+			} else {
 //				printk("[TP] Ignore VK interrupt due to 2d points did not leave\n");
+				synaptics_ts_button_func(ts);
+			}	
 		}
 		if (buf & get_address_base(ts, ts->finger_func_idx, INTR_SOURCE)) {
 			if (!vk_press) {
@@ -3236,7 +3315,7 @@ static int synaptics_ts_suspend(struct i2c_client *client, pm_message_t mesg)
 		//screen off, enable_irq_wake
 	/*	scr_suspended = true;
 		enable_irq_wake(client->irq);  */
-		if (s2w_switch == 1) {
+		if (s2w_switch == 1 || s2w_switch == 3) {
 		  enable_irq_wake(client->irq);
 		  s2w_wakestat = 1;
 		} else {
