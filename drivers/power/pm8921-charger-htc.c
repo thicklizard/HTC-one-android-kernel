@@ -4039,7 +4039,7 @@ static void dump_irq_rt_status(void)
 
 static void dump_reg(void)
 {
-	u64 val;
+	u64 val = 0;
 
 	get_reg((void *)CHG_CNTRL, &val);
 	pr_info("CHG_CNTRL = 0x%llx\n", val);

@@ -5,6 +5,10 @@
 # Rewritten to use lists instead of if-statements.
 # 
 
+ifdef CONFIG_CC_OPTIMIZE_ALOT
+CFLAGS_fs-writeback.o += -O2
+endif
+
 obj-y :=	open.o read_write.o file_table.o super.o \
 		char_dev.o stat.o exec.o pipe.o namei.o fcntl.o \
 		ioctl.o readdir.o select.o fifo.o dcache.o inode.o \
