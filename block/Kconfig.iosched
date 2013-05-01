@@ -123,7 +123,7 @@ config DEFAULT_IOSCHED
 	default "deadline" if DEFAULT_DEADLINE
 	default "cfq" if DEFAULT_CFQ
 	default "noop" if DEFAULT_NOOP
-	ddefault "zen" if DEFAULT_ZEN
+	default "zen" if DEFAULT_ZEN
 	default "vr" if DEFAULT_VR
 	default "sio" if DEFAULT_SIO
 	default "fiops" if DEFAULT_FIOPS
