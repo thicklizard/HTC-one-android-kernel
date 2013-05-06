@@ -273,7 +273,6 @@ static ssize_t headphone_pa_gain_store(struct kobject *kobj, struct kobj_attribu
 	r_mixer_ptr->platform_max = r_max;
 	r_mixer_ptr->max = r_max;
 	r_mixer_ptr->min += r_delta;
-
 	return count;
 }
 
