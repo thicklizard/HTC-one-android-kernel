@@ -118,7 +118,6 @@ static ssize_t show_overall_total_trans(struct kobject *kobj,
 						cpu1_total_trans,
 						cpu2_total_trans,
 						cpu3_total_trans);
-#endif
 }
 
 static ssize_t show_time_in_state(struct cpufreq_policy *policy, char *buf)
