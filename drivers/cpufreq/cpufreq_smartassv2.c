@@ -162,7 +162,7 @@ enum {
  */
 static unsigned long debug_mask;
 
-static int cpufreq_governor_smartass_h3(struct cpufreq_policy *policy,
+static int cpufreq_governor_smartassv2(struct cpufreq_policy *policy,
 		unsigned int event);
 
 #ifndef CONFIG_CPU_FREQ_DEFAULT_GOV_SMARTASSV2
@@ -695,7 +695,7 @@ static struct attribute_group smartass_attr_group = {
 	.name = "smartassv2",
 };
 
-static int cpufreq_governor_smartass_h3(struct cpufreq_policy *new_policy,
+static int cpufreq_governor_smartassv2(struct cpufreq_policy *new_policy,
 		unsigned int event)
 {
 	unsigned int cpu = new_policy->cpu;
@@ -880,7 +880,7 @@ static int __init cpufreq_smartass_init(void)
 
 	register_early_suspend(&smartass_power_suspend);
 
-	return cpufreq_register_governor(&cpufreq_gov_smartass_h3);
+	return cpufreq_register_governor(&cpufreq_gov_smartassv2);
 }
 
 #ifdef CONFIG_CPU_FREQ_DEFAULT_GOV_SMARTASSV2
@@ -891,7 +891,7 @@ module_init(cpufreq_smartass_init);
 
 static void __exit cpufreq_smartass_exit(void)
 {
-	cpufreq_unregister_governor(&cpufreq_gov_smartass_h3);
+	cpufreq_unregister_governor(&cpufreq_gov_smartassv2);
 	destroy_workqueue(up_wq);
 	destroy_workqueue(down_wq);
 }
