@@ -101,6 +101,12 @@ config CPU_FREQ_DEFAULT_GOV_BADASS
 
 	  If in doubt, say N
 
+config CPU_FREQ_DEFAULT_GOV_SMARTASSV2
+	bool "badass"
+	select CPU_FREQ_GOV_SMARTASSV2
+	help
+	  Use the CPUFreq governor 'smartassv2' as default.
+
 config CPU_FREQ_DEFAULT_GOV_CONSERVATIVE
 	bool "conservative"
 	select CPU_FREQ_GOV_CONSERVATIVE
@@ -226,6 +232,12 @@ config CPU_FREQ_GOV_LIONHEART
 	depends on CPU_FREQ
 	help
 	 Use the CPUFreq governor 'lionheart' as default.
+
+config CPU_FREQ_GOV_SMARTASSV2
+	tristate "smartassv2"
+	depends on CPU_FREQ
+	help
+	 Use the CPUFreq governor 'smartassv2' as default.
 
 
 config CPU_FREQ_GOV_USERSPACE
