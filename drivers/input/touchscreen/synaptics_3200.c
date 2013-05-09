@@ -143,12 +143,20 @@ static int synaptics_init_panel(struct synaptics_ts_data *ts);
 static irqreturn_t synaptics_irq_thread(int irq, void *ptr);
 
 extern unsigned int get_tamper_sf(void);
-
+bool scr_suspended = false;
+extern uint8_t touchscreen_is_on(void)
+{
+if (scr_suspended == false)
+{
+return 1;
+}
+return 0;
+}
 #ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE
 int s2w_switch = 1;
 int l2m_switch = 1;
 int s2w_wakestat = 0;
-bool scr_suspended = false;
+
 int s2w_hist[2] = {0, 0};
 cputime64_t s2w_time[2] = {0, 0};
 int l2m_hist[2] = {0, 0};
@@ -1458,6 +1466,12 @@ static ssize_t synaptics_sweep2wake_dump(struct device *dev,
 	if (buf[0] >= '0' && buf[0] <= '3' && buf[1] == '\n')
                 if (s2w_switch != buf[0] - '0')
 		        s2w_switch = buf[0] - '0';
+        	if (s2w_switch == 0)
+                printk(KERN_INFO "[SWEEP2WAKE]: Disabled.\n");
+            else if (s2w_switch > 0)
+                printk(KERN_INFO "[SWEEP2WAKE]: Enabled.\n");
+
+
 	return count;
 }
 
@@ -1470,6 +1484,12 @@ static ssize_t synaptics_logo2menu_show(struct device *dev, struct device_attrib
 	count += sprintf(buf, "%d\n", l2m_switch);
 
 	return count;
+        	if (l2m_switch == 0)
+                printk(KERN_INFO "[LOGO2MENU]: Disabled.\n");
+            else if (l2m_switch == 1)
+                printk(KERN_INFO "[LOGO2MENU]: Enabled.\n");
+
+
 }
 
 static ssize_t synaptics_logo2menu_dump(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
@@ -3307,9 +3327,9 @@ static int synaptics_ts_suspend(struct i2c_client *client, pm_message_t mesg)
 {
 	int ret = 0;
 	struct synaptics_ts_data *ts = i2c_get_clientdata(client);
-
+    scr_suspended = true;
 #ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE
-	scr_suspended = true;
+	
 	if (s2w_switch > 0) {
 		//screen off, enable_irq_wake
 	/*	scr_suspended = true;
@@ -3495,10 +3515,10 @@ static int synaptics_ts_resume(struct i2c_client *client)
 {
 	int ret;
 	struct synaptics_ts_data *ts = i2c_get_clientdata(client);
-
+    scr_suspended = false;
 #ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE  
                 //screen on, disable_irq_wake
-                scr_suspended = false;
+               
 	if (s2w_wakestat == 1) 
 		disable_irq_wake(client->irq);
 #endif
