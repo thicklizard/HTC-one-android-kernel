@@ -2710,6 +2710,12 @@ config FORCE_FAST_CHARGE
 		A simple sysfs interface to force adapters that
 		are detected as USB to charge as AC.
 
+config MSM_CPU_STOCK
+	bool "CPU stock clock support"
+  	default n
+  	help
+    	  To support the Max 1.7Ghz.
+
 config MSM_CPU_OC
 	bool "CPU over clock support"
   	default n

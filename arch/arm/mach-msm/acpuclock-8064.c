@@ -132,7 +132,7 @@ static struct l2_level l2_freq_tbl[] __initdata = {
 	[14] = { { 1134000, HFPLL, 1, 0x2A }, 1150000, 1150000, 6 },
 	[15] = { { 1188000, HFPLL, 1, 0x2C }, 1150000, 1150000, 6 },
 	[16] = { { 1242000, HFPLL, 1, 0x2E }, 1175000, 1175000, 6 },
-	[17] = { { 1242000, HFPLL, 1, 0x2E }, 1175000, 1175000, 7 },
+	[17] = { { 1242000, HFPLL, 1, 0x2E }, 1175000, 1175000, 6 },
 	[18] = { { 1296000, HFPLL, 1, 0x30 }, 1175000, 1175000, 5 },
 	[19] = { { 1350000, HFPLL, 1, 0x32 }, 1175000, 1175000, 5 },
 	{ }
@@ -257,14 +257,15 @@ static struct acpu_level tbl_PVS0_1700MHz[] __initdata = {
 	{ 1, {  1566000, HFPLL, 1, 0x3A }, L2(14), 1175000 },
 	{ 1, {  1674000, HFPLL, 1, 0x3E }, L2(15), 1225000 },
 	{ 1, {  1728000, HFPLL, 1, 0x40 }, L2(16), 1250000 },
-#ifdef CONFIG_MSM_CPU_OC
+#ifdef CONFIG_MSM_CPU_STOCK
 	{ 1, {  1836000, HFPLL, 1, 0x44 }, L2(16), 1287500 },
 	{ 1, {  1890000, HFPLL, 1, 0x46 }, L2(16), 1325000 },
 	{ 1, {  1944000, HFPLL, 1, 0x48 }, L2(17), 1325000 },
 	{ 1, {  1998000, HFPLL, 1, 0x4A }, L2(17), 1325000 },
+#ifndef CONFIG_MSM_CPU_OC
 	{ 1, {  2052000, HFPLL, 1, 0x4C }, L2(17), 1325000 },
 	{ 1, {  2106000, HFPLL, 1, 0x4E }, L2(17), 1350000 },
-	{ 1, {  2133000, HFPLL, 1, 0x4F }, L2(17), 1350000 },
+#endif
 #endif
 	{ 0, { 0 } }
 };
@@ -284,14 +285,15 @@ static struct acpu_level tbl_PVS1_1700MHz[] __initdata = {
 	{ 1, {  1566000, HFPLL, 1, 0x3A }, L2(14), 1150000 },
 	{ 1, {  1674000, HFPLL, 1, 0x3E }, L2(15), 1187500 },
 	{ 1, {  1728000, HFPLL, 1, 0x40 }, L2(16), 1200000 },
-#ifdef CONFIG_MSM_CPU_OC
+#ifdef CONFIG_MSM_CPU_STOCK
 	{ 1, {  1836000, HFPLL, 1, 0x44 }, L2(16), 1287500 },
 	{ 1, {  1890000, HFPLL, 1, 0x46 }, L2(16), 1325000 },
 	{ 1, {  1944000, HFPLL, 1, 0x48 }, L2(17), 1325000 },
 	{ 1, {  1998000, HFPLL, 1, 0x4A }, L2(17), 1325000 },
+#ifdef CONFIG_MSM_CPU_OC
 	{ 1, {  2052000, HFPLL, 1, 0x4C }, L2(17), 1325000 },
 	{ 1, {  2106000, HFPLL, 1, 0x4E }, L2(17), 1350000 },
-	{ 1, {  2133000, HFPLL, 1, 0x4F }, L2(17), 1350000 },
+#endif
 #endif
 	{ 0, { 0 } }
 };
@@ -311,14 +313,15 @@ static struct acpu_level tbl_PVS2_1700MHz[] __initdata = {
 	{ 1, {  1566000, HFPLL, 1, 0x3A }, L2(14), 1100000 },
 	{ 1, {  1674000, HFPLL, 1, 0x3E }, L2(15), 1137500 },
 	{ 1, {  1728000, HFPLL, 1, 0x40 }, L2(16), 1162500 },
-#ifdef CONFIG_MSM_CPU_OC
+#ifdef CONFIG_MSM_CPU_STOCK
 	{ 1, {  1836000, HFPLL, 1, 0x44 }, L2(16), 1212500 },
 	{ 1, {  1890000, HFPLL, 1, 0x46 }, L2(16), 1275000 },
 	{ 1, {  1944000, HFPLL, 1, 0x48 }, L2(17), 1325000 },
 	{ 1, {  1998000, HFPLL, 1, 0x4A }, L2(17), 1325000 },
+#ifdef CONFIG_MSM_CPU_OC
 	{ 1, {  2052000, HFPLL, 1, 0x4C }, L2(17), 1325000 },
 	{ 1, {  2106000, HFPLL, 1, 0x4E }, L2(17), 1350000 },
-	{ 1, {  2133000, HFPLL, 1, 0x4F }, L2(17), 1350000 },
+#endif
 #endif
 	{ 0, { 0 } }
 };
@@ -338,14 +341,15 @@ static struct acpu_level tbl_PVS3_1700MHz[] __initdata = {
 	{ 1, {  1566000, HFPLL, 1, 0x3A }, L2(14), 1062500 },
 	{ 1, {  1674000, HFPLL, 1, 0x3E }, L2(15), 1100000 },
 	{ 1, {  1728000, HFPLL, 1, 0x40 }, L2(16), 1125000 },
-#ifdef CONFIG_MSM_CPU_OC
+#ifdef CONFIG_MSM_CPU_STOCK
 	{ 1, {  1836000, HFPLL, 1, 0x44 }, L2(16), 1175000 },
 	{ 1, {  1890000, HFPLL, 1, 0x46 }, L2(16), 1250000 },
 	{ 1, {  1944000, HFPLL, 1, 0x48 }, L2(17), 1300000 },
 	{ 1, {  1998000, HFPLL, 1, 0x4A }, L2(17), 1300000 },
+#ifdef CONFIG_MSM_CPU_OC
 	{ 1, {  2052000, HFPLL, 1, 0x4C }, L2(17), 1300000 },
 	{ 1, {  2106000, HFPLL, 1, 0x4E }, L2(17), 1325000 },
-	{ 1, {  2133000, HFPLL, 1, 0x4F }, L2(17), 1325000 },
+#endif
 #endif
 	{ 0, { 0 } }
 };
@@ -365,14 +369,15 @@ static struct acpu_level tbl_PVS4_1700MHz[] __initdata = {
 	{ 1, {  1566000, HFPLL, 1, 0x3A }, L2(14), 1037500 },
 	{ 1, {  1674000, HFPLL, 1, 0x3E }, L2(15), 1075000 },
 	{ 1, {  1728000, HFPLL, 1, 0x40 }, L2(16), 1100000 },
-#ifdef CONFIG_MSM_CPU_OC
+#ifdef CONFIG_MSM_CPU_STOCK
 	{ 1, {  1836000, HFPLL, 1, 0x44 }, L2(16), 1125000 },
 	{ 1, {  1890000, HFPLL, 1, 0x46 }, L2(16), 1200000 },
 	{ 1, {  1944000, HFPLL, 1, 0x48 }, L2(17), 1300000 },
 	{ 1, {  1998000, HFPLL, 1, 0x4A }, L2(17), 1300000 },
+#ifdef CONFIG_MSM_CPU_OC
 	{ 1, {  2052000, HFPLL, 1, 0x4C }, L2(17), 1300000 },
 	{ 1, {  2106000, HFPLL, 1, 0x4E }, L2(17), 1325000 },
-	{ 1, {  2133000, HFPLL, 1, 0x4F }, L2(17), 1325000 },
+#endif
 #endif
 	{ 0, { 0 } }
 };
@@ -392,14 +397,15 @@ static struct acpu_level tbl_PVS5_1700MHz[] __initdata = {
 	{ 1, {  1566000, HFPLL, 1, 0x3A }, L2(14), 1012500 },
 	{ 1, {  1674000, HFPLL, 1, 0x3E }, L2(15), 1050000 },
 	{ 1, {  1728000, HFPLL, 1, 0x40 }, L2(16), 1075000 },
-#ifdef CONFIG_MSM_CPU_OC
+#ifdef CONFIG_MSM_CPU_STOCK
 	{ 1, {  1836000, HFPLL, 1, 0x44 }, L2(16), 1100000 },
 	{ 1, {  1890000, HFPLL, 1, 0x46 }, L2(16), 1150000 },
 	{ 1, {  1944000, HFPLL, 1, 0x48 }, L2(17), 1200000 },
 	{ 1, {  1998000, HFPLL, 1, 0x4A }, L2(17), 1225000 },
+#ifdef CONFIG_MSM_CPU_OC
 	{ 1, {  2052000, HFPLL, 1, 0x4C }, L2(17), 1250000 },
 	{ 1, {  2106000, HFPLL, 1, 0x4E }, L2(17), 1250000 },
-	{ 1, {  2133000, HFPLL, 1, 0x4F }, L2(17), 1300000 },
+#endif
 #endif
 	{ 0, { 0 } }
 };
@@ -419,14 +425,15 @@ static struct acpu_level tbl_PVS6_1700MHz[] __initdata = {
 	{ 1, {  1566000, HFPLL, 1, 0x3A }, L2(14), 1000000 },
 	{ 1, {  1674000, HFPLL, 1, 0x3E }, L2(15), 1025000 },
 	{ 1, {  1728000, HFPLL, 1, 0x40 }, L2(16), 1050000 },
-#ifdef CONFIG_MSM_CPU_OC
+#ifdef CONFIG_MSM_CPU_STOCK
 	{ 1, {  1836000, HFPLL, 1, 0x44 }, L2(16), 1100000 },
 	{ 1, {  1890000, HFPLL, 1, 0x46 }, L2(16), 1150000 },
 	{ 1, {  1944000, HFPLL, 1, 0x48 }, L2(17), 1200000 },
 	{ 1, {  1998000, HFPLL, 1, 0x4A }, L2(17), 1250000 },
+#ifdef CONFIG_MSM_CPU_OC
 	{ 1, {  2052000, HFPLL, 1, 0x4C }, L2(17), 1250000 },
 	{ 1, {  2106000, HFPLL, 1, 0x4E }, L2(17), 1300000 },
-	{ 1, {  2133000, HFPLL, 1, 0x4F }, L2(17), 1300000 },
+#endif
 #endif
 	{ 0, { 0 } }
 };
