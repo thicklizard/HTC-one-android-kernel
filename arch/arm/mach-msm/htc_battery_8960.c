@@ -2131,9 +2131,6 @@ static int __init htc_battery_init(void)
 	mutex_init(&batt_set_alarm_lock);
 #endif
 
-	
-
-	platform_driver_register(&htc_battery_driver);
 
 	
 	htc_batt_info.rep.batt_vol = 3700;
@@ -2157,6 +2154,8 @@ static int __init htc_battery_init(void)
 	alarm_data.lower_threshold = 2800;
 	alarm_data.upper_threshold = 4400;
 #endif
+
+	platform_driver_register(&htc_battery_driver); 
 
 	return 0;
 }

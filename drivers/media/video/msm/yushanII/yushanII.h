@@ -74,7 +74,7 @@ struct YushanII_sensor_data {
 	uint16_t x_even_inc;
 	uint16_t x_odd_inc;
 	uint16_t y_even_inc;
-	uint16_t y_odd_inc;
+	uint16_t y_odd_inc;int YushanII_Get_reloadInfo(void);
 	uint8_t binning_rawchip;
 	uint8_t use_rawchip;
 };
@@ -89,6 +89,7 @@ struct YushanII_info_t {
 };
 
 void YushanII_Init(struct msm_sensor_ctrl_t *sensor,int res);
+int YushanII_Get_reloadInfo(void);
 void YushanII_reload_firmware(void);
 int YushanII_probe_init(void);
 void YushanII_probe_deinit(void);

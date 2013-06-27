@@ -60,7 +60,10 @@ static int m7wl_enable_digital_mic(void)
         }
     }
     else{
-        return 1;
+        if ((skuid & 0xFFF00) == 0x34C00)
+		return 1;
+	else
+		return 2;
     }
 }
 
