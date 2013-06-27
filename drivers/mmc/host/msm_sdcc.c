@@ -490,7 +490,6 @@ static void msmsdcc_hard_reset(struct msmsdcc_host *host)
 void msmsdcc_reset_and_restore(struct msmsdcc_host *host)
 {
 	if (is_soft_reset(host)) {
-		if (is_soft_reset(host)) {
 		if (is_mmc_platform(host->plat)) {
 			if (is_sps_mode(host))
 				host->sps.reset_bam = true;

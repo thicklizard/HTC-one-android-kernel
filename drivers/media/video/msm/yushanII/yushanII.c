@@ -63,9 +63,6 @@ struct yushanII_int_t {
 
 static struct YushanII_ctrl *YushanIICtrl = NULL;
 
-int YushanII_Get_reloadInfo(void){
-  	return reload_firmware;
-} 
 
 void YushanII_reload_firmware(void){
 	reload_firmware = 1;
@@ -170,6 +167,7 @@ int  YushanII_set_default_IQ(void)
 	YushanII_set_tone_mapping(tone_map);
 	YushanII_set_defcor(disable_defcor);
 	YushanII_set_cls(&cls);
+
 	return 0;
 }
 
@@ -547,7 +545,9 @@ void YushanII_init_backcam(struct msm_sensor_ctrl_t *sensor,int res){
 
 	pr_info("[CAM]%s,res=%d,is_hdr=%d",
 		__func__, res,sensor->msm_sensor_reg->output_settings[res].is_hdr);
+
 	YushanII_login_start();
+
 	
 	if(sensor->msm_sensor_reg->output_settings[res].is_hdr)
 		sensor->sensordata->hdr_mode = 1;
@@ -591,6 +591,7 @@ void YushanII_init_backcam(struct msm_sensor_ctrl_t *sensor,int res){
 		
 		Ilp0100_interruptEnable(ENABLE_HTC_INTR, INTR_PIN_0);
 		Ilp0100_interruptEnable(ENABLE_RECOMMENDED_DEBUG_INTR_PIN1, INTR_PIN_1);
+		Ilp0100_stop();
 		pr_info("[CAM]%s, YushanII HDR mode", __func__);
 		Ilp0100_defineMode(output_format);
 		YushanII_default_exp();
@@ -598,11 +599,11 @@ void YushanII_init_backcam(struct msm_sensor_ctrl_t *sensor,int res){
 		#ifdef HDR_COLOR_BAR
 		Ilp0100_startTestMode(BYPASS_NO_BYPASS, TEST_COLORBAR);
 		#endif
-
 	}else{
 		
 		Ilp0100_interruptEnable(ENABLE_NO_INTR, INTR_PIN_0);
 		Ilp0100_interruptEnable(ENABLE_NO_INTR, INTR_PIN_1);
+		Ilp0100_stop();
 		pr_info(" [CAM]%s, YushanII NON HDR mode", __func__);
 		Ilp0100_defineMode(output_format);
 		#ifdef HDR_COLOR_BAR
@@ -656,7 +657,8 @@ void YushanII_init_frontcam(struct msm_sensor_ctrl_t *sensor,int res){
 		sensor->sensordata->camera_type,
 		first_init_2nd_cam);
 
-	if (first_init_2nd_cam) {		
+	if (first_init_2nd_cam) {
+		
 		Ilp0100_defineMode(output_format);
 		#ifdef HDR_COLOR_BAR
 		Ilp0100_startTestMode(BYPASS_NO_BYPASS, TEST_COLORBAR);
@@ -1107,9 +1109,9 @@ int YushanII_set_defcor(int disable_defcor){
 	Ilp0100_structDefcorParams DefcorParams;
 	pr_info("[CAM] %s, set disable defcor correction:%d", __func__, disable_defcor);
 
-	DefcorParams.BlackStrength = 15;
+	DefcorParams.BlackStrength = 11;
 	DefcorParams.CoupletThreshold = 200;
-	DefcorParams.SingletThreshold = 11;
+	DefcorParams.SingletThreshold = 15;
 	DefcorParams.WhiteStrength = 15;
 
 	if (disable_defcor == 1) {
@@ -1344,47 +1346,6 @@ int YushanII_set_hdr_merge_mode(void __user *argp){
 	return 0;
 }
 
-void YushanII_set_tm_MergeGain(void){
-	uint32_t hist_Y1 = 0x0;
-	uint32_t hist_Y0 = 0x0;
-	uint32_t line_Y0 = 0x0;
-	uint32_t line_Y1 = 0x0;
-	uint8_t check[4];
-	memset(check, 0x0, sizeof(check));
-	
-	hist_Y1 = 0x467ffc00;
-	hist_Y0 = 0x45c00000;
-	
-	line_Y0 = 0x467ffc00;
-	line_Y1 = 0x45c00000;
-	Ilp0100_writeRegister(0x0f5c, (uint8_t *) &hist_Y1);
-	Ilp0100_writeRegister(0x0f58, (uint8_t *) &hist_Y0);
-
-	Ilp0100_writeRegister(0x0f70, (uint8_t *) &line_Y0);
-	Ilp0100_writeRegister(0x0f74, (uint8_t *) &line_Y1);
-}
-
-void YushanII_set_tm_LongOnlyGain(void){
-	uint32_t hist_Y1 = 0x0;
-	uint32_t hist_Y0 = 0x0;
-	uint32_t line_Y0 = 0x0;
-	uint32_t line_Y1 = 0x0;
-	uint8_t check[4];
-	memset(check, 0x0, sizeof(check));
-	
-	hist_Y1 = 0x45c00000;
-	hist_Y0 = 0x45800000;
-	
-	line_Y0 = 0x45c00000;
-	line_Y1 = 0x45800000;
-	Ilp0100_writeRegister(0x0f5c, (uint8_t *) &hist_Y1);
-	Ilp0100_writeRegister(0x0f58, (uint8_t *) &hist_Y0);
-
-	Ilp0100_writeRegister(0x0f70, (uint8_t *) &line_Y0);
-	Ilp0100_writeRegister(0x0f74, (uint8_t *) &line_Y1);
-
-}
-
 int YushanII_set_hdr_factor(void __user *argp){
        uint8_t usr_HDRFactor;
 
@@ -1403,12 +1364,6 @@ int YushanII_set_hdr_factor(void __user *argp){
 
 			pr_info("[CAM] %s, set hdr factor: HDRFactor error and overbound", __func__);
 		}
-	pr_info("%s usr_HDRFactor:%d",__func__,usr_HDRFactor);
-
-	  if(usr_HDRFactor > 1)
-	    	YushanII_set_tm_MergeGain();
-	  else 
-	    	YushanII_set_tm_LongOnlyGain();
 
        Ilp0100_setHDRFactor(usr_HDRFactor);
        return 0;
@@ -1716,4 +1671,3 @@ MODULE_VERSION("YushanII 0.1");
 
 module_init(YushanII_driver_init);
 module_exit(YushanII_driver_exit);
-
