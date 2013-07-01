@@ -1176,6 +1176,15 @@ int usb_suspend(struct device *dev, pm_message_t msg)
 {
 	struct usb_device	*udev = to_usb_device(dev);
 
+	if (udev->bus->skip_resume) {
+    		if (udev->state == USB_STATE_SUSPENDED) {
+      			return 0;
+    		} else {
+      			dev_err(dev, "abort suspend\n");
+      			return -EBUSY;
+    		}
+ 	 } 
+
 	unbind_no_pm_drivers_interfaces(udev);
 
 	choose_wakeup(udev, msg);
@@ -1264,7 +1273,14 @@ int usb_autoresume_device(struct usb_device *udev)
 		pm_runtime_put_sync(&udev->dev);
 	dev_vdbg(&udev->dev, "%s: cnt %d -> %d\n",
 			__func__, atomic_read(&udev->dev.power.usage_count),
-			status);
+			/*
++   * Some buses would like to keep their devices in suspend
++   * state after system resume.  Their resume happen when
++   * a remote wakeup is detected or interface driver start
++   * I/O.
++   */
++  if (udev->bus->skip_resume)
++    return 0;status);
 	if (status > 0)
 		status = 0;
 	return status;
@@ -1304,7 +1320,14 @@ void usb_autopm_put_interface_no_suspend(struct usb_interface *intf)
 
 	usb_mark_last_busy(udev);
 	atomic_dec(&intf->pm_usage_cnt);
-	pm_runtime_put_noidle(&intf->dev);
+	pm_runtime_p/*
++   * Some buses would like to keep their devices in suspend
++   * state after system resume.  Their resume happen when
++   * a remote wakeup is detected or interface driver start
++   * I/O.
++   */
++  if (udev->bus->skip_resume)
++    return 0;ut_noidle(&intf->dev);
 }
 EXPORT_SYMBOL_GPL(usb_autopm_put_interface_no_suspend);
 
@@ -1395,6 +1418,15 @@ int usb_runtime_suspend(struct device *dev)
 {
 	struct usb_device	*udev = to_usb_device(dev);
 	int			status;
+
+	  /*
+	   * Some buses would like to keep their devices in suspend
+	   * state after system resume.  Their resume happen when
+	   * a remote wakeup is detected or interface driver start
+	   * I/O.
+	   */
+  		if (udev->bus->skip_resume)
+    			return 0;
 	
 	int ret = 0;
 	
