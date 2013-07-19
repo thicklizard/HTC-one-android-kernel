@@ -175,16 +175,23 @@ extern void sweep2wake_setdev(struct input_dev * input_device) {
 EXPORT_SYMBOL(sweep2wake_setdev);
 
 static void sweep2wake_presspwr(struct work_struct * sweep2wake_presspwr_work) {
-	if (!mutex_trylock(&pwrkeyworklock))
-                return;
-	input_event(sweep2wake_pwrdev, EV_KEY, KEY_POWER, 1);
-	input_event(sweep2wake_pwrdev, EV_SYN, 0, 0);
-	msleep(100);
-	input_event(sweep2wake_pwrdev, EV_KEY, KEY_POWER, 0);
-	input_event(sweep2wake_pwrdev, EV_SYN, 0, 0);
-	msleep(100);
-        mutex_unlock(&pwrkeyworklock);
-	return;
+	int pocket_mode = 0;
+	
+	pocket_mode = power_key_check_in_pocket();
+
+	if (!pocket_mode) {
+
+		if (!mutex_trylock(&pwrkeyworklock))
+        	        return;
+		input_event(sweep2wake_pwrdev, EV_KEY, KEY_POWER, 1);
+		input_event(sweep2wake_pwrdev, EV_SYN, 0, 0);
+		msleep(100);
+		input_event(sweep2wake_pwrdev, EV_KEY, KEY_POWER, 0);
+		input_event(sweep2wake_pwrdev, EV_SYN, 0, 0);
+		msleep(100);
+        	mutex_unlock(&pwrkeyworklock);
+		return;
+	}
 }
 static DECLARE_WORK(sweep2wake_presspwr_work, sweep2wake_presspwr);
 
