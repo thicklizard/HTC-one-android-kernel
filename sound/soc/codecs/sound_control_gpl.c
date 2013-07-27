@@ -1,6 +1,7 @@
 /*
  * Author: Paul Reioux aka Faux123 <reioux@gmail.com>
  *
+ *  Modifications made by thicklizard
  * WCD93xx sound control module
  * Copyright 2013 Paul Reioux
  *
@@ -163,21 +164,28 @@ static ssize_t speaker_gain_store(struct kobject *kobj, struct kobj_attribute *a
 	return (count);
 }
 
-static ssize_t headphone_gain_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
+static ssize_t headphone_left_gain_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
 {
-	struct soc_mixer_control *l_mixer_ptr, *r_mixer_ptr;
+	struct soc_mixer_control *l_mixer_ptr;
 
 	l_mixer_ptr =
 		(struct soc_mixer_control *)
 			gpl_faux_snd_controls_ptr[HEADPHONE_L_OFFSET].
 			private_value;
+
+		return sprintf(buf, "%d",
+			l_mixer_ptr->max);
+}
+static ssize_t headphone_right_gain_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)	
+{
+	struct soc_mixer_control *r_mixer_ptr;
+
 	r_mixer_ptr =
 		(struct soc_mixer_control *)
 			gpl_faux_snd_controls_ptr[HEADPHONE_R_OFFSET].
 			private_value;
 
-	return sprintf(buf, "%d %d",
-			l_mixer_ptr->max,
+	return sprintf(buf, "%d",
 			r_mixer_ptr->max);
 }
 
@@ -301,10 +309,16 @@ static struct kobj_attribute speaker_gain_attribute =
 		speaker_gain_show,
 		speaker_gain_store);
 
-static struct kobj_attribute headphone_gain_attribute =
-	__ATTR(gpl_headphone_gain,
+static struct kobj_attribute headphone_right_gain_attribute =
+	__ATTR(gpl_headphone_right_gain,
 		0666,
-		headphone_gain_show,
+		headphone_right_gain_show,
+		headphone_gain_store);
+
+static struct kobj_attribute headphone_left_gain_attribute =
+	__ATTR(gpl_headphone_left_gain,
+		0666,
+		headphone_left_gain_show,
 		headphone_gain_store);
 
 static struct kobj_attribute headphone_pa_gain_attribute =
@@ -323,7 +337,8 @@ static struct attribute *sound_control_attrs[] =
 		&cam_mic_gain_attribute.attr,
 		&mic_gain_attribute.attr,
 		&speaker_gain_attribute.attr,
-		&headphone_gain_attribute.attr,
+		&headphone_left_gain_attribute.attr,
+		&headphone_right_gain_attribute.attr,
 		&headphone_pa_gain_attribute.attr,
 		&sound_control_version_attribute.attr,
 		NULL,
