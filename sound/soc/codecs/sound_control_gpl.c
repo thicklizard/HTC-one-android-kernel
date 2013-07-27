@@ -237,24 +237,31 @@ static ssize_t headphone_gain_store(struct kobject *kobj, struct kobj_attribute 
 	return count;
 }
 
-static ssize_t headphone_pa_gain_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
+static ssize_t headphone_right_pa_gain_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
 {
-	struct soc_mixer_control *l_mixer_ptr, *r_mixer_ptr;
+	struct soc_mixer_control *r_mixer_ptr;
 
-	l_mixer_ptr =
-		(struct soc_mixer_control *)
-			gpl_faux_snd_controls_ptr[HEADPHONE_PA_L_OFFSET].
-			private_value;
 	r_mixer_ptr =
 		(struct soc_mixer_control *)
 			gpl_faux_snd_controls_ptr[HEADPHONE_PA_R_OFFSET].
 			private_value;
 
-	return sprintf(buf, "%d %d",
-			l_mixer_ptr->max,
+	return sprintf(buf, "%d",
 			r_mixer_ptr->max);
 }
 
+static ssize_t headphone_left_pa_gain_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
+{
+	struct soc_mixer_control *l_mixer_ptr;
+
+	l_mixer_ptr =
+		(struct soc_mixer_control *)
+			gpl_faux_snd_controls_ptr[HEADPHONE_PA_L_OFFSET].
+			private_value;
+	
+	return sprintf(buf, "%d",
+			l_mixer_ptr->max);
+}
 static ssize_t headphone_pa_gain_store(struct kobject *kobj, struct kobj_attribute *attr, const char *buf, size_t count)
 {
 	int l_max, r_max;
@@ -321,10 +328,16 @@ static struct kobj_attribute headphone_left_gain_attribute =
 		headphone_left_gain_show,
 		headphone_gain_store);
 
-static struct kobj_attribute headphone_pa_gain_attribute =
-	__ATTR(gpl_headphone_pa_gain,
+static struct kobj_attribute headphone_right_pa_gain_attribute =
+	__ATTR(gpl_headphone_right_pa_gain,
 		0666,
-		headphone_pa_gain_show,
+		headphone_right_pa_gain_show,
+		headphone_pa_gain_store);
+
+static struct kobj_attribute headphone_left_pa_gain_attribute =
+	__ATTR(gpl_headphone_left_pa_gain,
+		0666,
+		headphone_left_pa_gain_show,
 		headphone_pa_gain_store);
 
 static struct kobj_attribute sound_control_version_attribute =
@@ -339,7 +352,8 @@ static struct attribute *sound_control_attrs[] =
 		&speaker_gain_attribute.attr,
 		&headphone_left_gain_attribute.attr,
 		&headphone_right_gain_attribute.attr,
-		&headphone_pa_gain_attribute.attr,
+		&headphone_right_pa_gain_attribute.attr,
+		&headphone_left_pa_gain_attribute.attr,
 		&sound_control_version_attribute.attr,
 		NULL,
 	};
