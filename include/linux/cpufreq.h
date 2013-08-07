@@ -14,6 +14,7 @@
 #include <linux/mutex.h>
 #include <linux/notifier.h>
 #include <linux/threads.h>
+#include <linux/device.h>
 #include <linux/kobject.h>
 #include <linux/sysfs.h>
 #include <linux/completion.h>
@@ -24,6 +25,9 @@
 #define CPUFREQ_NAME_LEN 16
 
 
+/*********************************************************************
+ *                     CPUFREQ NOTIFIER INTERFACE                    *
+ *********************************************************************/
 
 #define CPUFREQ_TRANSITION_NOTIFIER	(0)
 #define CPUFREQ_POLICY_NOTIFIER		(1)
@@ -46,6 +50,10 @@ static inline int cpufreq_unregister_notifier(struct notifier_block *nb,
 static inline void disable_cpufreq(void) { }
 #endif		
 
+/* if (cpufreq_driver->target) exists, the ->governor decides what frequency
+ * within the limits is used. If (cpufreq_driver->setpolicy> exists, these
+ * two generic policies are available:
+ */
 
 #define CPUFREQ_POLICY_POWERSAVE	(1)
 #define CPUFREQ_POLICY_PERFORMANCE	(2)
@@ -55,6 +63,7 @@ static inline void disable_cpufreq(void) { }
 
 struct cpufreq_governor;
 
+/* /sys/devices/system/cpu/cpufreq: entry point for global variables */
 extern struct kobject *cpufreq_global_kobject;
 
 #define CPUFREQ_ETERNAL			(-1)
@@ -105,6 +114,7 @@ struct cpufreq_policy {
 #define CPUFREQ_SHARED_TYPE_ALL	 (2) 
 #define CPUFREQ_SHARED_TYPE_ANY	 (3) 
 
+/******************** cpufreq transition notifiers *******************/
 
 #define CPUFREQ_PRECHANGE	(0)
 #define CPUFREQ_POSTCHANGE	(1)
@@ -119,6 +129,15 @@ struct cpufreq_freqs {
 };
 
 
+/**
+ * cpufreq_scale - "old * mult / div" calculation for large values (32-bit-arch safe)
+ * @old:   old value
+ * @div:   divisor
+ * @mult:  multiplier
+ *
+ *
+ *    new = old * mult / div
+ */
 static inline unsigned long cpufreq_scale(unsigned long old, u_int div, u_int mult)
 {
 #if BITS_PER_LONG == 32
@@ -136,6 +155,9 @@ static inline unsigned long cpufreq_scale(unsigned long old, u_int div, u_int mu
 #endif
 };
 
+/*********************************************************************
+ *                          CPUFREQ GOVERNORS                        *
+ *********************************************************************/
 
 #define CPUFREQ_GOV_START  1
 #define CPUFREQ_GOV_STOP   2
@@ -154,6 +176,9 @@ struct cpufreq_governor {
 	struct module		*owner;
 };
 
+/*
+ * Pass a target to the cpufreq driver.
+ */
 extern int cpufreq_driver_target(struct cpufreq_policy *policy,
 				 unsigned int target_freq,
 				 unsigned int relation);
@@ -211,6 +236,7 @@ struct cpufreq_driver {
 	struct freq_attr	**attr;
 };
 
+/* flags */
 
 #define CPUFREQ_STICKY		0x01	
 #define CPUFREQ_CONST_LOOPS	0x02	
@@ -274,10 +300,14 @@ static struct global_attr _name =		\
 __ATTR(_name, 0644, show_##_name, store_##_name)
 
 
+/*********************************************************************
+ *                        CPUFREQ 2.6. INTERFACE                     *
+ *********************************************************************/
 int cpufreq_get_policy(struct cpufreq_policy *policy, unsigned int cpu);
 int cpufreq_update_policy(unsigned int cpu);
 
 #ifdef CONFIG_CPU_FREQ
+/* query the current CPU frequency (in kHz). If zero, cpufreq couldn't detect it */
 unsigned int cpufreq_get(unsigned int cpu);
 #else
 static inline unsigned int cpufreq_get(unsigned int cpu)
@@ -286,6 +316,7 @@ static inline unsigned int cpufreq_get(unsigned int cpu)
 }
 #endif
 
+/* query the last known CPU freq (in kHz). If zero, cpufreq couldn't detect it */
 #ifdef CONFIG_CPU_FREQ
 unsigned int cpufreq_quick_get(unsigned int cpu);
 unsigned int cpufreq_quick_get_max(unsigned int cpu);
@@ -301,8 +332,15 @@ static inline unsigned int cpufreq_quick_get_max(unsigned int cpu)
 #endif
 
 
+/*********************************************************************
+ *                       CPUFREQ DEFAULT GOVERNOR                    *
+ *********************************************************************/
 
 
+/*
+  Performance governor is fallback governor if any other gov failed to
+  auto load due latency restrictions
+*/
 #ifdef CONFIG_CPU_FREQ_GOV_PERFORMANCE
 extern struct cpufreq_governor cpufreq_gov_performance;
 #endif
@@ -320,13 +358,12 @@ extern struct cpufreq_governor cpufreq_gov_ondemand;
 #elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_CONSERVATIVE)
 extern struct cpufreq_governor cpufreq_gov_conservative;
 #define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_conservative)
-#elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_INTERACTIVE)
+#endif#elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_INTERACTIVE)
 extern struct cpufreq_governor cpufreq_gov_interactive;
 #define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_interactive)
 #elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_INTELLIDEMAND)
 extern struct cpufreq_governor cpufreq_gov_intellidemand;
 #define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_intellidemand)
-<<<<<<< HEAD
 #elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_SMARTASS2)
 extern struct cpufreq_governor cpufreq_gov_smartass2;
 #define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_smartass2)
@@ -366,11 +403,12 @@ extern struct cpufreq_governor cpufreq_gov_ondemandx;
 #elif defined(CPU_FREQ_DEFAULT_GOV_BRAZILIANWAX)
 extern struct cpufreq_governor cpufreq_gov_brazilianwax;
 #define CPUFREQ_DEFAULT_GOVERNOR  (&cpufreq_gov_brazilianwax)
-=======
->>>>>>> parent of 7e0f70e... Added LulzactiveV2,Lagfree,Smartass,SmartassV2,Minmax,InteractiveX Governor
 #endif
 
 
+/*********************************************************************
+ *                     FREQUENCY TABLE HELPERS                       *
+ *********************************************************************/
 
 #define CPUFREQ_ENTRY_INVALID ~0
 #define CPUFREQ_TABLE_END     ~1
@@ -393,10 +431,12 @@ int cpufreq_frequency_table_target(struct cpufreq_policy *policy,
 				   unsigned int relation,
 				   unsigned int *index);
 
+/* the following 3 funtions are for cpufreq core use only */
 struct cpufreq_frequency_table *cpufreq_frequency_get_table(unsigned int cpu);
 struct cpufreq_policy *cpufreq_cpu_get(unsigned int cpu);
 void   cpufreq_cpu_put(struct cpufreq_policy *data);
 
+/* the following are really really optional */
 extern struct freq_attr cpufreq_freq_attr_scaling_available_freqs;
 
 void cpufreq_frequency_table_get_attr(struct cpufreq_frequency_table *table,
