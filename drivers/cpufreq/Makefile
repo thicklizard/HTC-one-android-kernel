@@ -16,15 +16,20 @@ obj-$(CONFIG_CPU_FREQ_GOV_PERFORMANCE)	+= cpufreq_performance.o
 obj-$(CONFIG_CPU_FREQ_GOV_POWERSAVE)	+= cpufreq_powersave.o
 obj-$(CONFIG_CPU_FREQ_GOV_SLP)		+= cpufreq_slp.o
 obj-$(CONFIG_CPU_FREQ_GOV_SMARTASSH3)	+= cpufreq_smartassH3.o
+obj-$(CONFIG_CPU_FREQ_GOV_lulzactive)    += cpufreq_lulzactive.o
+obj-$(CONFIG_CPU_FREQ_GOV_SavagedZen)   += cpufreq_savagedzen.o
+obj-$(CONFIG_CPU_FREQ_GOV_BRAZILIANWAX) += cpufreq_brazilianwax.o
+obj-$(CONFIG_CPU_FREQ_GOV_SCARY)	+= cpufreq_scary.o
+obj-$(CONFIG_CPU_FREQ_GOV_SMOOTHASS)	+= cpufreq_smoothass.o
+obj-$(CONFIG_CPU_FREQ_GOV_SCARY)	+= cpufreq_scary.o
+obj-$(CONFIG_CPU_FREQ_GOV_HOTPLUG)	+= cpufreq_hotplug.o
 obj-$(CONFIG_CPU_FREQ_GOV_USERSPACE)	+= cpufreq_userspace.o
-obj-$(CONFIG_CPU_FREQ_GOV_LIONHEART)	+= cpufreq_lionheart.o
-obj-$(CONFIG_CPU_FREQ_GOV_INTELLIDEMAND)	+= cpufreq_intellidemand.o
 obj-$(CONFIG_CPU_FREQ_GOV_WHEATLEY)	+= cpufreq_wheatley.o
 
 # CPUfreq cross-arch helpers
 obj-$(CONFIG_CPU_FREQ_TABLE)		+= freq_table.o
 
-##################################################################################
+##################################################################################d
 # x86 drivers.
 # Link order matters. K8 is preferred to ACPI because of firmware bugs in early
 # K8 systems. ACPI is preferred to all other hardware-specific drivers.
