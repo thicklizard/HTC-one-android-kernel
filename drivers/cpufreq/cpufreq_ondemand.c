@@ -51,6 +51,7 @@
 
 static unsigned int min_sampling_rate;
 static unsigned int skip_ondemand = 0;
+extern DEFINE_PER_CPU(int, cpufreq_init_done);
 
 #define LATENCY_MULTIPLIER			(1000)
 #define MIN_LATENCY_MULTIPLIER			(100)
@@ -66,8 +67,6 @@ static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 #ifndef CONFIG_CPU_FREQ_DEFAULT_GOV_ONDEMAND
 static
 #endif
-
-extern DEFINE_PER_CPU(int, cpufreq_init_done); 
 
 struct cpufreq_governor cpufreq_gov_ondemand = {
        .name                   = "ondemand",
