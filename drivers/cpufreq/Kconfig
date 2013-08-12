@@ -104,8 +104,23 @@ config CPU_FREQ_DEFAULT_GOV_CONSERVATIVE
 	  driver. Fallback governor will be the performance governor.
 
 config CPU_FREQ_DEFAULT_GOV_SMARTASSV2
-	bool "badass"
+	bool "smartassv2"
 	select CPU_FREQ_GOV_SMARTASSV2
+	help
+
+config CPU_FREQ_DEFAULT_GOV_SAVAGEDZEN
+	bool "savagedzen"
+	select CPU_FREQ_GOV_SAVAGEDZEN
+	help
+
+config CPU_FREQ_DEFAULT_GOV_LULZACTIVE
+	bool "lulzactive"
+	select CPU_FREQ_GOV_LULZACTIVE
+	help
+
+config CPU_FREQ_DEFAULT_GOV_MINMAX
+	bool "minmax"
+	select CPU_FREQ_GOV_MINMAX
 	help
 
 config CPU_FREQ_DEFAULT_GOV_LIONHEART
@@ -331,6 +346,21 @@ config CPU_FREQ_GOV_LIONHEART
 
 config CPU_FREQ_GOV_SMARTASSV2
 	tristate "smartassv2"
+	depends on CPU_FREQ
+	help
+
+config CPU_FREQ_GOV_SAVAGEDZEN
+	tristate "savagedzen"
+	depends on CPU_FREQ
+	help
+
+config CPU_FREQ_GOV_LULZACTIVE
+	tristate "lulzactive"
+	depends on CPU_FREQ
+	help
+
+config CPU_FREQ_GOV_MINMAX
+	tristate "minmax"
 	depends on CPU_FREQ
 	help
 
