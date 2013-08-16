@@ -1695,7 +1695,7 @@ static int msm_be_hw_params_fixup(struct snd_soc_pcm_runtime *rtd,
 	param_set_mask(params, SNDRV_PCM_HW_PARAM_FORMAT,
 		SNDRV_PCM_FORMAT_S16_LE);
 
-	rate->min = rate->max = 96000;
+	rate->min = rate->max = 48000;
 
 	return 0;
 }
